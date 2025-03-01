@@ -5,7 +5,18 @@ Entity::Entity(Dungeon& dungeon, EntityType type) : dungeon(dungeon), type(type)
 
 void Entity::Draw()
 {
-	DrawTextureV(texture, Vector2Multiply(position, { TILE_SIZE, TILE_SIZE }), WHITE);
+	if (type == Player)
+		DrawTextureV(texture, Vector2Multiply(position, { TILE_SIZE, TILE_SIZE }), WHITE);
+}
+
+void Entity::Move(Vector2 direction)
+{
+	Vector2 newPosition = Vector2Add(position, direction);
+
+	if (newPosition.x < 1 || newPosition.x >= DUNGEON_WIDTH - 1 || newPosition.y < 1 || newPosition.y >= DUNGEON_HEIGHT - 1) return;
+	if (dungeon.GetTile(newPosition) != FLOOR) return;
+
+	position = newPosition;
 }
 
 void Entity::Walk()

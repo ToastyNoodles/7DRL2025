@@ -23,5 +23,6 @@ public:
 	Texture texture;
 
 	void Draw();
+	void Move(Vector2 direction);
 	void Walk();
 };
