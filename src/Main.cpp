@@ -10,7 +10,6 @@ int main()
 	SetTargetFPS(144); 
     
     Dungeon dungeon = { 100, 100 };
-    dungeon.Generate();
 
     Camera2D camera = {};
     camera.zoom = 2.0f;

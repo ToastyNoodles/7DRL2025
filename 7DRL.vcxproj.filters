@@ -46,9 +46,6 @@
     <Image Include="res\wall.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\slime.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\exit.png">
       <Filter>Resource Files</Filter>
     </Image>

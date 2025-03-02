@@ -5,7 +5,9 @@ Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(wi
 {
 	wallTexture = LoadTexture("res/wall.png");
 	exitTexture = LoadTexture("res/exit.png");
-	playerTexture = LoadTexture("res/player.png");
+	entityTextures.LoadTextures();
+
+	Generate();
 }
 
 void Dungeon::Generate()
@@ -83,7 +85,7 @@ void Dungeon::Generate()
 
 	SpawnExit();
 	SpawnPlayer();
-	SpawnEnemies(5);
+	SpawnEnemies(GetRandomValue(2, 8));
 }
 
 void Dungeon::Update()
@@ -91,6 +93,12 @@ void Dungeon::Update()
 	if (isPlayerTurn)
 	{
 		player->Update(*this);
+
+		int playerTileIndex = player->y * width + player->x;
+		if (tiles[playerTileIndex] == EXIT)
+		{
+			Generate();
+		}
 	}
 
 	if (!isPlayerTurn)
@@ -213,7 +221,7 @@ void Dungeon::SpawnExit()
 
 void Dungeon::SpawnPlayer()
 {
-	player = new Player(width / 2, height / 2, playerTexture);
+	player = new Player(width / 2, height / 2);
 }
 
 void Dungeon::SpawnEnemies(int count)
@@ -232,7 +240,7 @@ void Dungeon::SpawnEnemies(int count)
 		int x = tileIndex % width;
 		int y = tileIndex / width;
 
-		Enemy* enemy = new Enemy(x, y, playerTexture);
+		Enemy* enemy = new Enemy(x, y);
 		entities.push_back(enemy);
 	}
 

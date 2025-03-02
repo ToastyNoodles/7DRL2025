@@ -41,5 +41,4 @@ private:
 
 	Texture wallTexture;
 	Texture exitTexture;
-	Texture playerTexture;
 };

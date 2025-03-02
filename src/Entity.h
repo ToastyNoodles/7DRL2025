@@ -1,6 +1,18 @@
 #pragma once
 #include "Dungeon.h"
 
+struct EntityTextures
+{
+	Texture playerTexture;
+	Texture slimeTexture;
+
+	void LoadTextures()
+	{
+		playerTexture = LoadTexture("res/player.png");
+		slimeTexture = LoadTexture("res/snake.png");
+	}
+} static entityTextures;
+
 struct Entity
 {
 	int x, y;
@@ -12,12 +24,12 @@ struct Entity
 
 struct Player : public Entity
 {
-	Player(int spawnX, int spawnY, Texture playerTexture)
+	Player(int spawnX, int spawnY)
 	{
 		x = spawnX;
 		y = spawnY;
 		isActive = true;
-		texture = playerTexture;
+		texture = entityTextures.playerTexture;
 	}
 
 	void Draw() override
@@ -48,19 +60,19 @@ struct Player : public Entity
 
 struct Enemy : public Entity
 {
-	Enemy(int spawnX, int spawnY, Texture enemyTexture)
+	Enemy(int spawnX, int spawnY)
 	{
 		x = spawnX;
 		y = spawnY;
 		isActive = true;
-		texture = enemyTexture;
+		texture = entityTextures.slimeTexture;
 	}
 
 	void Draw() override
 	{
 		int worldX = x * TILE_SIZE;
 		int worldY = y * TILE_SIZE;
-		DrawTexture(texture, worldX, worldY, RED);
+		DrawTexture(texture, worldX, worldY, { 155, 35, 35, 255 });
 	}
 
 	void Update(Dungeon& dungeon) override

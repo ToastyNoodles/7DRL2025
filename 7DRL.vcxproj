@@ -168,7 +168,6 @@
   <ItemGroup>
     <Image Include="res\exit.png" />
     <Image Include="res\player.png" />
-    <Image Include="res\slime.png" />
     <Image Include="res\wall.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
