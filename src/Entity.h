@@ -5,11 +5,13 @@ struct EntityTextures
 {
 	Texture playerTexture;
 	Texture slimeTexture;
+	Texture itemTexture;
 
 	void LoadTextures()
 	{
 		playerTexture = LoadTexture("res/player.png");
 		slimeTexture = LoadTexture("res/snake.png");
+		itemTexture = LoadTexture("res/item.png");
 	}
 } static entityTextures;
 
@@ -74,7 +76,7 @@ struct Enemy : public Entity
 	{
 		int worldX = x * TILE_SIZE;
 		int worldY = y * TILE_SIZE;
-		DrawTexture(texture, worldX, worldY, { 155, 35, 35, 255 });
+		DrawTexture(texture, worldX, worldY, MAROON);
 	}
 
 	void Update(Dungeon& dungeon) override
@@ -98,5 +100,28 @@ struct Enemy : public Entity
 			y = nextY;
 			dungeon.SetTile(x, y, ENEMY);
 		}
+	}
+};
+
+struct Item : public Entity
+{
+	Item(int spawnX, int spawnY)
+	{
+		x = spawnX;
+		y = spawnY;
+		isActive = true;
+		texture = entityTextures.itemTexture;
+	}
+
+	void Draw() override
+	{
+		int worldX = x * TILE_SIZE;
+		int worldY = y * TILE_SIZE;
+		DrawTexture(texture, worldX, worldY, YELLOW);
+	}
+
+	void Update(Dungeon& dungeon) override
+	{
+		
 	}
 };

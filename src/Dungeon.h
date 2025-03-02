@@ -14,7 +14,8 @@ enum Tile
 	WALL = 2,
 	EXIT = 3,
 	PLAYER = 4,
-	ENEMY = 5
+	ENEMY = 5,
+	ITEM = 6
 };
 
 class Dungeon
@@ -39,6 +40,7 @@ private:
 	void SpawnExit();
 	void SpawnPlayer();
 	void SpawnEnemies();
+	void SpawnItems();
 
 	std::vector<Tile> tiles;
 	std::vector<Entity*> entities;

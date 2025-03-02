@@ -49,5 +49,11 @@
     <Image Include="res\exit.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\item.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\snake.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

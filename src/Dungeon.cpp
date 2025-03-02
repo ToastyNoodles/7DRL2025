@@ -86,6 +86,7 @@ void Dungeon::Generate()
 	SpawnExit();
 	SpawnPlayer();
 	SpawnEnemies();
+	SpawnItems();
 }
 
 void Dungeon::Update()
@@ -141,38 +142,38 @@ void Dungeon::Draw()
 	player->Draw();
 
 	//DEBUG TILE STATES
-	for (int i = 0; i < tiles.size(); i++)
-	{
-		int tileX = i % width;
-		int tileY = i / width;
-		int worldX = tileX * TILE_SIZE;
-		int worldY = tileY * TILE_SIZE;
-
-		if (tiles[i] == FLOOR)
-		{
-			DrawRectangle(worldX, worldY, 2, 2, YELLOW);
-		}
-		else if (tiles[i] == WALL)
-		{
-			DrawRectangle(worldX, worldY, 2, 2, DARKGREEN);
-		}
-		else if (tiles[i] == EXIT)
-		{
-			DrawRectangle(worldX, worldY, 2, 2, PURPLE);
-		}
-		else if (tiles[i] == PLAYER)
-		{
-			DrawRectangle(worldX, worldY, 2, 2, BLUE);
-		}
-		else if (tiles[i] == ENEMY)
-		{
-			DrawRectangle(worldX, worldY, 2, 2, RED);
-		}
-		else if (tiles[i] == NONE)
-		{
-			DrawRectangle(worldX, worldY, 2, 2, ORANGE);
-		}
-	}
+	//for (int i = 0; i < tiles.size(); i++)
+	//{
+	//	int tileX = i % width;
+	//	int tileY = i / width;
+	//	int worldX = tileX * TILE_SIZE;
+	//	int worldY = tileY * TILE_SIZE;
+	//
+	//	if (tiles[i] == FLOOR)
+	//	{
+	//		DrawRectangle(worldX, worldY, 2, 2, YELLOW);
+	//	}
+	//	else if (tiles[i] == WALL)
+	//	{
+	//		DrawRectangle(worldX, worldY, 2, 2, DARKGREEN);
+	//	}
+	//	else if (tiles[i] == EXIT)
+	//	{
+	//		DrawRectangle(worldX, worldY, 2, 2, PURPLE);
+	//	}
+	//	else if (tiles[i] == PLAYER)
+	//	{
+	//		DrawRectangle(worldX, worldY, 2, 2, BLUE);
+	//	}
+	//	else if (tiles[i] == ENEMY)
+	//	{
+	//		DrawRectangle(worldX, worldY, 2, 2, RED);
+	//	}
+	//	else if (tiles[i] == NONE)
+	//	{
+	//		DrawRectangle(worldX, worldY, 2, 2, ORANGE);
+	//	}
+	//}
 }
 
 Vector2 Dungeon::GetPlayerPosition()
@@ -188,7 +189,7 @@ bool Dungeon::IsTileValid(int x, int y)
 	}
 
 	int index = y * width + x;
-	if (tiles[index] == WALL || tiles[index] == ENEMY)
+	if (tiles[index] == WALL || tiles[index] == ENEMY || tiles[index] == PLAYER)
 	{
 		return false;
 	}
@@ -288,7 +289,7 @@ void Dungeon::SpawnEnemies()
 
 	int spawnLow = (currentFloor / 2);
 	int spawnHigh = (int)pow(currentFloor, 1.1) - 1;
-	TraceLog(LOG_INFO, "Floor: %i | Low: %i | High: %i", currentFloor, spawnLow, spawnHigh);
+	TraceLog(LOG_INFO, "ENEMY SPAWNING |Floor: %i | Low: %i | High: %i", currentFloor, spawnLow, spawnHigh);
 	int spawnCount = GetRandomValue(spawnLow, spawnHigh);
 	for (int i = 0; i < spawnCount; i++)
 	{
@@ -301,5 +302,33 @@ void Dungeon::SpawnEnemies()
 		entities.push_back(enemy);
 
 		tiles[y * width + x] = ENEMY;
+	}
+}
+
+void Dungeon::SpawnItems()
+{
+	std::vector<int> floorIndices = GetFloorIndices();
+	if (floorIndices.empty())
+	{
+		TraceLog(LOG_ERROR, "No valid positions to spawn items!");
+		return;
+	}
+
+	int spawnLow = (currentFloor / 2);
+	int spawnHigh = (currentFloor / 2);
+	if (currentFloor < 2) { spawnLow = 1; spawnHigh = 1; }
+	TraceLog(LOG_INFO, "ITEM SPAWNING | Floor: %i | Low: %i | High: %i", currentFloor, spawnLow, spawnHigh);
+	int spawnCount = GetRandomValue(spawnLow, spawnHigh);
+	for (int i = 0; i < spawnCount; i++)
+	{
+		int randomIndex = GetRandomValue(0, floorIndices.size() - 1);
+		int tileIndex = floorIndices[randomIndex];
+		int x = tileIndex % width;
+		int y = tileIndex / width;
+
+		Item* item = new Item(x, y);
+		entities.push_back(item);
+
+		tiles[y * width + x] = ITEM;
 	}
 }
