@@ -40,6 +40,7 @@ int main()
         dungeon.Draw();
         EndMode2D();
 
+        DrawText(TextFormat("Floor %i", dungeon.currentFloor), 4, 4, 24, WHITE);
 
         EndDrawing();
 	}

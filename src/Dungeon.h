@@ -30,13 +30,15 @@ public:
 	void SetPlayerTurn(bool state);
 	void SetTile(int x, int y, Tile type);
 	Tile GetTile(int x, int y);
+
+	int currentFloor;
 private:
 	std::vector<int> GetFloorIndices();
 	std::vector<int> GetFloorIndicesExcludingPlayerRadius(int radius);
 
 	void SpawnExit();
 	void SpawnPlayer();
-	void SpawnEnemies(int count);
+	void SpawnEnemies();
 
 	std::vector<Tile> tiles;
 	std::vector<Entity*> entities;

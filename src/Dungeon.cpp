@@ -1,7 +1,7 @@
 #include "Dungeon.h"
 #include "Entity.h"
 
-Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(width * height, NONE), isPlayerTurn(true)
+Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(width * height, NONE), isPlayerTurn(true), currentFloor(1)
 {
 	wallTexture = LoadTexture("res/wall.png");
 	exitTexture = LoadTexture("res/exit.png");
@@ -22,7 +22,7 @@ void Dungeon::Generate()
 	int lastDirection = -1;
 
 	//Modified drunk walk
-	for (int i = 0; i < 2500; i++)
+	for (int i = 0; i < (500 + (currentFloor * 100)); i++)
 	{
 		int randomDirection;
 		do {
@@ -85,7 +85,7 @@ void Dungeon::Generate()
 
 	SpawnExit();
 	SpawnPlayer();
-	SpawnEnemies(GetRandomValue(2, 8));
+	SpawnEnemies();
 }
 
 void Dungeon::Update()
@@ -98,6 +98,7 @@ void Dungeon::Update()
 		if (tiles[playerTileIndex] == EXIT)
 		{
 			Generate();
+			currentFloor += 1;
 		}
 	}
 
@@ -181,15 +182,13 @@ Vector2 Dungeon::GetPlayerPosition()
 
 bool Dungeon::IsTileValid(int x, int y)
 {
-	//Bounds check
 	if (x < 0 || x >= width || y < 0 || y >= height)
 	{
 		return false;
 	}
 
-	//Tile can be on
 	int index = y * width + x;
-	if (tiles[index] == WALL)
+	if (tiles[index] == WALL || tiles[index] == ENEMY)
 	{
 		return false;
 	}
@@ -278,7 +277,7 @@ void Dungeon::SpawnPlayer()
 	tiles[y * width + x] = PLAYER;
 }
 
-void Dungeon::SpawnEnemies(int count)
+void Dungeon::SpawnEnemies()
 {
 	std::vector<int> floorIndices = GetFloorIndicesExcludingPlayerRadius(5);
 	if (floorIndices.empty())
@@ -287,7 +286,11 @@ void Dungeon::SpawnEnemies(int count)
 		return;
 	}
 
-	for (int i = 0; i < count; i++)
+	int spawnLow = (currentFloor / 2);
+	int spawnHigh = (int)pow(currentFloor, 1.1) - 1;
+	TraceLog(LOG_INFO, "Floor: %i | Low: %i | High: %i", currentFloor, spawnLow, spawnHigh);
+	int spawnCount = GetRandomValue(spawnLow, spawnHigh);
+	for (int i = 0; i < spawnCount; i++)
 	{
 		int randomIndex = GetRandomValue(0, floorIndices.size() - 1);
 		int tileIndex = floorIndices[randomIndex];
