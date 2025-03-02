@@ -1,17 +1,17 @@
 #include "Dungeon.h"
 #include "Entity.h"
 
-#define TILE_SIZE 16
-
-Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(width * height, NONE)
+Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(width * height, NONE), isPlayerTurn(true)
 {
 	wallTexture = LoadTexture("res/wall.png");
 	exitTexture = LoadTexture("res/exit.png");
+	playerTexture = LoadTexture("res/player.png");
 }
 
 void Dungeon::Generate()
 {
 	std::fill(tiles.begin(), tiles.end(), NONE);
+	entities.clear();
 
 	int x = width / 2;
 	int y = height / 2;
@@ -83,14 +83,24 @@ void Dungeon::Generate()
 
 	SpawnExit();
 	SpawnPlayer();
+	SpawnEnemies(5);
 }
 
 void Dungeon::Update()
 {
-	for (Entity* entity : entities)
+	if (isPlayerTurn)
 	{
-		if (entity->isActive)
-			entity->Update(*this);
+		player->Update(*this);
+	}
+
+	if (!isPlayerTurn)
+	{
+		for (Entity* entity : entities)
+		{
+			if (entity->isActive)
+				entity->Update(*this);
+		}
+		isPlayerTurn = true;
 	}
 }
 
@@ -118,6 +128,8 @@ void Dungeon::Draw()
 		if (entity->isActive)
 			entity->Draw();
 	}
+
+	player->Draw();
 }
 
 bool Dungeon::IsTileValid(int x, int y)
@@ -136,6 +148,11 @@ bool Dungeon::IsTileValid(int x, int y)
 	}
 
 	return true;
+}
+
+void Dungeon::SetPlayerTurn(bool state)
+{
+	isPlayerTurn = state;
 }
 
 std::vector<int> Dungeon::GetFloorIndices()
@@ -196,6 +213,27 @@ void Dungeon::SpawnExit()
 
 void Dungeon::SpawnPlayer()
 {
-	Player* player = new Player(width / 2, height / 2);
-	entities.push_back(player);
+	player = new Player(width / 2, height / 2, playerTexture);
+}
+
+void Dungeon::SpawnEnemies(int count)
+{
+	std::vector<int> floorIndices = GetFloorIndicesExcludingPlayerRadius(5);
+	if (floorIndices.empty())
+	{
+		TraceLog(LOG_ERROR, "No valid positions with constraint to spawn enemy!");
+		return;
+	}
+
+	for (int i = 0; i < count; i++)
+	{
+		int randomIndex = GetRandomValue(0, floorIndices.size() - 1);
+		int tileIndex = floorIndices[randomIndex];
+		int x = tileIndex % width;
+		int y = tileIndex / width;
+
+		Enemy* enemy = new Enemy(x, y, playerTexture);
+		entities.push_back(enemy);
+	}
+
 }
