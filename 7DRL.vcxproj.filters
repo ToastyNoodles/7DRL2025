@@ -21,9 +21,6 @@
     <ClCompile Include="src\Dungeon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\raylib\include\raylib.h">
@@ -38,15 +35,15 @@
     <ClInclude Include="src\Dungeon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\player.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\wall.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\slime.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

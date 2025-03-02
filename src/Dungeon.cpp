@@ -1,97 +1,100 @@
 #include "Dungeon.h"
 
-Dungeon::Dungeon()
+#define TILE_SIZE 16
+
+Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(width * height, NONE)
 {
-	playerTexture = LoadTexture("res/player.png");
 	wallTexture = LoadTexture("res/wall.png");
+	playerTexture = LoadTexture("res/player.png");
 }
 
-void Dungeon::GenerateDungeon()
+void Dungeon::Generate()
 {
-	entities.clear();
+	std::fill(tiles.begin(), tiles.end(), NONE);
 
-	//Initialize dungeon map 
-	for (int i = 0; i < DUNGEON_COUNT; i++)
-	{
-		dungeon[i] = WALL;
-	}
+	int x = width / 2;
+	int y = height / 2;
+	tiles[y * width + x] = FLOOR;
 
-	//Spawn drunkWalker
-	Vector2 dungeonCenter = { floorf(DUNGEON_WIDTH / 2.0f), floorf(DUNGEON_HEIGHT / 2.0f) };
+	int lastDirection = -1;
 
-	Entity drunkWalker = { *this, Walker };
-	drunkWalker.position = dungeonCenter;
-	drunkWalker.healthPoints = 1000;
-	drunkWalker.Walk();
+	//Modified drunk walk
+	for (int i = 0; i < 1500; i++)
+	{
+		int randomDirection;
+		do {
+			randomDirection = GetRandomValue(0, 3);
+		} while (randomDirection == lastDirection);
 
-	//Spawn player
-	entities.emplace_back(*this, Player);
-	player = &entities[0];
-	player->position = dungeonCenter;
-	player->texture = playerTexture;
-	player->healthPoints = 20;
-	player->actionPoints = 5;
-}
+		if (randomDirection == 0) { y--; }		//Up
+		else if (randomDirection == 1) { y++; } //Down
+		else if (randomDirection == 2) { x--; } //Left
+		else if (randomDirection == 3) { x++; } //Right
 
-void Dungeon::UpdateDungeon()
-{
-	if (IsKeyPressed(KEY_W))
-	{
-		player->Move({ 0, -1 });
-	}
-	else if (IsKeyPressed(KEY_S))
-	{
-		player->Move({ 0, 1 });
-	}
-	else if (IsKeyPressed(KEY_A))
-	{
-		player->Move({ -1, 0 });
-	}
-	else if (IsKeyPressed(KEY_D))
-	{
-		player->Move({ 1, 0 });
-	}
-}
-
-void Dungeon::DrawDungeon()
-{
-	//Draw whatever texture is at the position
-	for (int i = 0; i < DUNGEON_COUNT; i++)
-	{
-		if (dungeon[i] != FLOOR)
+		if (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1)
 		{
-			Vector2 tilePosition = PositionFromIndex(i);
-			DrawTextureV(wallTexture, Vector2Multiply(tilePosition, { TILE_SIZE, TILE_SIZE }), LIGHTGRAY);
+			x = width / 2;
+			y = height / 2;
+			lastDirection = -1;
+		}
+		else
+		{
+			lastDirection = randomDirection;
+		}
+
+		tiles[y * width + x] = FLOOR;
+	}
+
+	//Surround floor with walls
+	int maxTiles = width * height;
+	for (int i = 0; i < maxTiles; i++)
+	{
+		if (tiles[i] == FLOOR)
+		{
+			int x = i % width;
+			int y = i / width;
+
+			if (tiles[(y - 1) * width + x] != FLOOR)
+				tiles[(y - 1) * width + x] = WALL;
+
+			if (tiles[(y + 1) * width + x] != FLOOR)
+				tiles[(y + 1) * width + x] = WALL;
+
+			if (tiles[y * width + (x - 1)] != FLOOR)
+				tiles[y * width + (x - 1)] = WALL;
+
+			if (tiles[y * width + (x + 1)] != FLOOR)
+				tiles[y * width + (x + 1)] = WALL;
+
+			if (tiles[(y - 1) * width + (x - 1)] != FLOOR)
+				tiles[(y - 1) * width + (x - 1)] = WALL;
+
+			if (tiles[(y + 1) * width + (x + 1)] != FLOOR)
+				tiles[(y + 1) * width + (x + 1)] = WALL;
+
+			if (tiles[(y - 1) * width + (x + 1)] != FLOOR)
+				tiles[(y - 1) * width + (x + 1)] = WALL;
+
+			if (tiles[(y + 1) * width + (x - 1)] != FLOOR)
+				tiles[(y + 1) * width + (x - 1)] = WALL;
 		}
 	}
+}
 
-	for (Entity& ent : entities)
+void Dungeon::Draw()
+{
+	int maxTiles = width * height;
+	for (int i = 0; i < maxTiles; i++)
 	{
-		ent.Draw();
+		int tileX = i % width;
+		int tileY = i / width;
+		int worldX = tileX * TILE_SIZE;
+		int worldY = tileY * TILE_SIZE;
+
+		if (tiles[i] == WALL)
+		{
+			DrawTexture(wallTexture, worldX, worldY, LIGHTGRAY);
+		}
 	}
-}
-
-void Dungeon::SetTile(Vector2 position, Tile tile)
-{
-	dungeon[IndexFromPosition(position)] = tile;
-}
-
-Tile Dungeon::GetTile(Vector2 position)
-{
-	return dungeon[IndexFromPosition(position)];
-}
-
-Vector2 Dungeon::GetPlayerPosition()
-{
-	return player->position;
-}
-
-Vector2 Dungeon::PositionFromIndex(int index)
-{
-	return { floorf(index % DUNGEON_WIDTH), floorf(index / DUNGEON_WIDTH) };
-}
-
-int Dungeon::IndexFromPosition(Vector2 position)
-{
-	return floorf(position.y) * DUNGEON_WIDTH + floorf(position.x);
+	DrawTexture(playerTexture, (width / 2) * TILE_SIZE, (height / 2) * TILE_SIZE, WHITE);
 }

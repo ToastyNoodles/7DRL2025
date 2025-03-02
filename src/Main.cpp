@@ -5,33 +5,37 @@
 
 int main()
 {
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
 	InitWindow(1280, 720, "7DRL");
 	SetTargetFPS(60); 
     
-	Dungeon dungeon;
-	dungeon.GenerateDungeon();
+    Dungeon dungeon = { 64, 64 };
+    dungeon.Generate();
 
     Camera2D camera = {};
-    camera.zoom = 1.0f;
-    camera.target = Vector2Multiply(dungeon.GetPlayerPosition(), { TILE_SIZE, TILE_SIZE });
+    camera.zoom = 2.0f;
 
 	while (!WindowShouldClose())
 	{
         camera.offset = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-        camera.target = Vector2Lerp(camera.target, Vector2Multiply(dungeon.GetPlayerPosition(), { TILE_SIZE, TILE_SIZE }), GetFrameTime() * 4.0f);
+        camera.zoom += GetMouseWheelMove() * (0.1 * camera.zoom);
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+        {
+            Vector2 mouseDelta = Vector2Divide(GetMouseDelta(), { camera.zoom, camera.zoom });
+            camera.target = { camera.target.x - mouseDelta.x, camera.target.y - mouseDelta.y };
+        }
 
         if (IsKeyPressed(KEY_R))
         {
-            dungeon.GenerateDungeon();
+            dungeon.Generate();
         }
-
-        dungeon.UpdateDungeon();
 
         BeginDrawing();
         ClearBackground(BLACK);
 
         BeginMode2D(camera);
-        dungeon.DrawDungeon();
+        dungeon.Draw();
         EndMode2D();
 
 
