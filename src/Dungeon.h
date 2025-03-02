@@ -23,6 +23,7 @@ public:
 	void Update();
 	void Draw();
 
+	Vector2 GetPlayerPosition();
 	bool IsTileValid(int x, int y);
 	void SetPlayerTurn(bool state);
 private:

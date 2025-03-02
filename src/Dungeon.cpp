@@ -140,6 +140,11 @@ void Dungeon::Draw()
 	player->Draw();
 }
 
+Vector2 Dungeon::GetPlayerPosition()
+{
+	return { (float)player->x, (float)player->y };
+}
+
 bool Dungeon::IsTileValid(int x, int y)
 {
 	//Bounds check
