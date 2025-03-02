@@ -138,6 +138,40 @@ void Dungeon::Draw()
 	}
 
 	player->Draw();
+
+	//DEBUG TILE STATES
+	for (int i = 0; i < tiles.size(); i++)
+	{
+		int tileX = i % width;
+		int tileY = i / width;
+		int worldX = tileX * TILE_SIZE;
+		int worldY = tileY * TILE_SIZE;
+
+		if (tiles[i] == FLOOR)
+		{
+			DrawRectangle(worldX, worldY, 2, 2, YELLOW);
+		}
+		else if (tiles[i] == WALL)
+		{
+			DrawRectangle(worldX, worldY, 2, 2, DARKGREEN);
+		}
+		else if (tiles[i] == EXIT)
+		{
+			DrawRectangle(worldX, worldY, 2, 2, PURPLE);
+		}
+		else if (tiles[i] == PLAYER)
+		{
+			DrawRectangle(worldX, worldY, 2, 2, BLUE);
+		}
+		else if (tiles[i] == ENEMY)
+		{
+			DrawRectangle(worldX, worldY, 2, 2, RED);
+		}
+		else if (tiles[i] == NONE)
+		{
+			DrawRectangle(worldX, worldY, 2, 2, ORANGE);
+		}
+	}
 }
 
 Vector2 Dungeon::GetPlayerPosition()
@@ -166,6 +200,17 @@ bool Dungeon::IsTileValid(int x, int y)
 void Dungeon::SetPlayerTurn(bool state)
 {
 	isPlayerTurn = state;
+}
+
+void Dungeon::SetTile(int x, int y, Tile type)
+{
+	if (tiles[y * width + x] != EXIT)
+		tiles[y * width + x] = type;
+}
+
+Tile Dungeon::GetTile(int x, int y)
+{
+	return tiles[y * width + x];
 }
 
 std::vector<int> Dungeon::GetFloorIndices()
@@ -227,6 +272,10 @@ void Dungeon::SpawnExit()
 void Dungeon::SpawnPlayer()
 {
 	player = new Player(width / 2, height / 2);
+
+	int x = width / 2;
+	int y = height / 2;
+	tiles[y * width + x] = PLAYER;
 }
 
 void Dungeon::SpawnEnemies(int count)
@@ -247,6 +296,7 @@ void Dungeon::SpawnEnemies(int count)
 
 		Enemy* enemy = new Enemy(x, y);
 		entities.push_back(enemy);
-	}
 
+		tiles[y * width + x] = ENEMY;
+	}
 }

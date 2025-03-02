@@ -12,7 +12,9 @@ enum Tile
 	NONE = 0,
 	FLOOR = 1,
 	WALL = 2,
-	EXIT
+	EXIT = 3,
+	PLAYER = 4,
+	ENEMY = 5
 };
 
 class Dungeon
@@ -26,6 +28,8 @@ public:
 	Vector2 GetPlayerPosition();
 	bool IsTileValid(int x, int y);
 	void SetPlayerTurn(bool state);
+	void SetTile(int x, int y, Tile type);
+	Tile GetTile(int x, int y);
 private:
 	std::vector<int> GetFloorIndices();
 	std::vector<int> GetFloorIndicesExcludingPlayerRadius(int radius);

@@ -51,8 +51,10 @@ struct Player : public Entity
 
 		if (dungeon.IsTileValid(nextX, nextY) && moved)
 		{
+			dungeon.SetTile(x, y, FLOOR);
 			x = nextX;
 			y = nextY;
+			dungeon.SetTile(x, y, PLAYER);
 			dungeon.SetPlayerTurn(false);
 		}
 	}
@@ -91,8 +93,10 @@ struct Enemy : public Entity
 
 		if (dungeon.IsTileValid(nextX, nextY))
 		{
+			dungeon.SetTile(x, y, FLOOR);
 			x = nextX;
 			y = nextY;
+			dungeon.SetTile(x, y, ENEMY);
 		}
 	}
 };
