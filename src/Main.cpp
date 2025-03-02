@@ -7,9 +7,9 @@ int main()
 {
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 	InitWindow(1280, 720, "7DRL");
-	SetTargetFPS(60); 
+	SetTargetFPS(144); 
     
-    Dungeon dungeon = { 64, 64 };
+    Dungeon dungeon = { 100, 100 };
     dungeon.Generate();
 
     Camera2D camera = {};
@@ -30,6 +30,8 @@ int main()
         {
             dungeon.Generate();
         }
+
+        dungeon.Update();
 
         BeginDrawing();
         ClearBackground(BLACK);

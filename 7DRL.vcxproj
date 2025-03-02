@@ -160,11 +160,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Dungeon.h" />
+    <ClInclude Include="src\Entity.h" />
     <ClInclude Include="vendor\raylib\include\raylib.h" />
     <ClInclude Include="vendor\raylib\include\raymath.h" />
     <ClInclude Include="vendor\raylib\include\rlgl.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\exit.png" />
     <Image Include="res\player.png" />
     <Image Include="res\slime.png" />
     <Image Include="res\wall.png" />

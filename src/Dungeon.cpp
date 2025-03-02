@@ -1,11 +1,12 @@
 #include "Dungeon.h"
+#include "Entity.h"
 
 #define TILE_SIZE 16
 
 Dungeon::Dungeon(int width, int height) : width(width), height(height), tiles(width * height, NONE)
 {
 	wallTexture = LoadTexture("res/wall.png");
-	playerTexture = LoadTexture("res/player.png");
+	exitTexture = LoadTexture("res/exit.png");
 }
 
 void Dungeon::Generate()
@@ -19,7 +20,7 @@ void Dungeon::Generate()
 	int lastDirection = -1;
 
 	//Modified drunk walk
-	for (int i = 0; i < 1500; i++)
+	for (int i = 0; i < 2500; i++)
 	{
 		int randomDirection;
 		do {
@@ -45,46 +46,57 @@ void Dungeon::Generate()
 		tiles[y * width + x] = FLOOR;
 	}
 
-	//Surround floor with walls
-	int maxTiles = width * height;
-	for (int i = 0; i < maxTiles; i++)
+	//Surround floors with walls
+	int directions[8][2] = {
+		{ 0, -1}, // Up
+		{ 0,  1}, // Down
+		{-1,  0}, // Left
+		{ 1,  0}, // Right
+		{-1, -1}, // Top-left
+		{ 1, -1}, // Top-right
+		{-1,  1}, // Bottom-left
+		{ 1,  1}  // Bottom-right
+	};
+
+	for (int i = 0; i < tiles.size(); i++)
 	{
 		if (tiles[i] == FLOOR)
 		{
 			int x = i % width;
 			int y = i / width;
 
-			if (tiles[(y - 1) * width + x] != FLOOR)
-				tiles[(y - 1) * width + x] = WALL;
+			for (const auto& dir : directions)
+			{
+				int newX = x + dir[1];
+				int newY = y + dir[0];
 
-			if (tiles[(y + 1) * width + x] != FLOOR)
-				tiles[(y + 1) * width + x] = WALL;
-
-			if (tiles[y * width + (x - 1)] != FLOOR)
-				tiles[y * width + (x - 1)] = WALL;
-
-			if (tiles[y * width + (x + 1)] != FLOOR)
-				tiles[y * width + (x + 1)] = WALL;
-
-			if (tiles[(y - 1) * width + (x - 1)] != FLOOR)
-				tiles[(y - 1) * width + (x - 1)] = WALL;
-
-			if (tiles[(y + 1) * width + (x + 1)] != FLOOR)
-				tiles[(y + 1) * width + (x + 1)] = WALL;
-
-			if (tiles[(y - 1) * width + (x + 1)] != FLOOR)
-				tiles[(y - 1) * width + (x + 1)] = WALL;
-
-			if (tiles[(y + 1) * width + (x - 1)] != FLOOR)
-				tiles[(y + 1) * width + (x - 1)] = WALL;
+				if (newX >= 0 && newX < width && newY >= 0 && newY < height)
+				{
+					if (tiles[newY * width + newX] != FLOOR)
+					{
+						tiles[newY * width + newX] = WALL;
+					}
+				}
+			}
 		}
+	}
+
+	SpawnExit();
+	SpawnPlayer();
+}
+
+void Dungeon::Update()
+{
+	for (Entity* entity : entities)
+	{
+		if (entity->isActive)
+			entity->Update(*this);
 	}
 }
 
 void Dungeon::Draw()
 {
-	int maxTiles = width * height;
-	for (int i = 0; i < maxTiles; i++)
+	for (int i = 0; i < tiles.size(); i++)
 	{
 		int tileX = i % width;
 		int tileY = i / width;
@@ -95,6 +107,95 @@ void Dungeon::Draw()
 		{
 			DrawTexture(wallTexture, worldX, worldY, LIGHTGRAY);
 		}
+		else if (tiles[i] == EXIT)
+		{
+			DrawTexture(exitTexture, worldX, worldY, LIGHTGRAY);
+		}
 	}
-	DrawTexture(playerTexture, (width / 2) * TILE_SIZE, (height / 2) * TILE_SIZE, WHITE);
+
+	for (Entity* entity : entities)
+	{
+		if (entity->isActive)
+			entity->Draw();
+	}
+}
+
+bool Dungeon::IsTileValid(int x, int y)
+{
+	//Bounds check
+	if (x < 0 || x >= width || y < 0 || y >= height)
+	{
+		return false;
+	}
+
+	//Tile can be on
+	int index = y * width + x;
+	if (tiles[index] == WALL)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+std::vector<int> Dungeon::GetFloorIndices()
+{
+	std::vector<int> floorIndices;
+	for (int i = 0; i < tiles.size(); i++)
+	{
+		int x = i % width;
+		int y = i / width;
+		if (tiles[i] == FLOOR && x != (width / 2) && y != (height / 2))
+			floorIndices.push_back(i);
+	}
+
+	return floorIndices;
+}
+
+std::vector<int> Dungeon::GetFloorIndicesExcludingPlayerRadius(int radius)
+{
+	std::vector<int> floorIndices;
+	int playerX = width / 2;
+	int playerY = height / 2;
+
+	for (int i = 0; i < tiles.size(); i++) 
+	{
+		if (tiles[i] == FLOOR) 
+		{
+			int x = i % width;
+			int y = i / width;
+			if (abs(x - playerX) > radius || abs(y - playerY) > radius) 
+			{
+				floorIndices.push_back(i);
+			}
+		}
+	}
+
+	return floorIndices;
+}
+
+void Dungeon::SpawnExit()
+{
+	std::vector<int> floorIndices = GetFloorIndicesExcludingPlayerRadius(20);
+	if (floorIndices.empty())
+	{
+		TraceLog(LOG_ERROR, "No valid positions with constraint to spawn exit! Trying again! (1/2)");
+		floorIndices = GetFloorIndicesExcludingPlayerRadius(10);
+		if (floorIndices.empty())
+		{
+			TraceLog(LOG_ERROR, "No valid positions to spawn exit! Regenerating dungeon! (2/2)");
+			Generate();
+			return;
+		}
+	}
+
+	int randomIndex = GetRandomValue(0, floorIndices.size() - 1);
+	int exitIndex = floorIndices[randomIndex];
+	tiles[exitIndex] = EXIT;
+}
+
+void Dungeon::SpawnPlayer()
+{
+	Player* player = new Player(width / 2, height / 2);
+	entities.push_back(player);
 }
